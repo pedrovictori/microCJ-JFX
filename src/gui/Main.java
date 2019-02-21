@@ -61,7 +61,6 @@ public class Main extends Application {
 
     final Group cellsRoot = new Group();
     final Xform axisGroup = new Xform();
-    final Xform moleculeGroup = new Xform();
     final Xform world = new Xform();
     final PerspectiveCamera camera = new PerspectiveCamera(true);
     final Xform cameraXform = new Xform();
@@ -137,7 +136,7 @@ public class Main extends Application {
         world.getChildren().addAll(axisGroup);
     }
 
-    private void handleMouse(Scene scene, final Node root) {
+    private void handleMouse(Node scene, final Node root) {
         scene.setOnMousePressed(new EventHandler<MouseEvent>() {
             @Override public void handle(MouseEvent me) {
                 mousePosX = me.getSceneX();
@@ -194,9 +193,6 @@ public class Main extends Application {
                         break;
                     case X:
                         axisGroup.setVisible(!axisGroup.isVisible());
-                        break;
-                    case V:
-                        moleculeGroup.setVisible(!moleculeGroup.isVisible());
                         break;
                 }
             }
@@ -284,7 +280,7 @@ public class Main extends Application {
         if (empty) {
             return ec;
         } else {
-            return findEmptyCenter(distance+0.004, origin); //that number was determined via trial and error as the lowest one needed to avoid an stack overflow error
+            return findEmptyCenter(distance+0.005, origin); //that number was determined via trial and error as the lowest one needed to avoid an stack overflow error
         }
     }
 
@@ -308,20 +304,23 @@ public class Main extends Application {
         buildCamera();
         buildAxes();
         generateCells();
-        //Parent root = FXMLLoader.load(getClass().getResource("main.fxml"));
-        SplitPane root = new SplitPane(cellsRoot, new Pane());
+        Parent genesRoot = FXMLLoader.load(getClass().getResource("genes.fxml"));
+        SubScene genesScene = new SubScene(genesRoot, 1024, 768);
+        SubScene cellsScene = new SubScene(cellsRoot, 1024, 768, true, SceneAntialiasing.BALANCED);
 
-        Scene scene = new Scene(root, 1024, 768, true);
-        scene.setFill(Color.CORNSILK);
+        SplitPane root = new SplitPane(cellsScene, genesScene);
 
-        handleKeyboard(scene, world);
-        handleMouse(scene, world);
+        Scene mainScene = new Scene(root, 1024, 768, true);
+        mainScene.setFill(Color.CORNSILK);
+
+        handleKeyboard(mainScene, world);
+        handleMouse(cellsScene, world);
 
         primaryStage.setTitle("microC2");
-        primaryStage.setScene(scene);
+        primaryStage.setScene(mainScene);
         primaryStage.show();
 
-        scene.setCamera(camera);
+        cellsScene.setCamera(camera);
     }
 
     /**
