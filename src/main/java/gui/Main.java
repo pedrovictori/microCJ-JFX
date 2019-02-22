@@ -35,12 +35,16 @@ package gui;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Orientation;
 import javafx.geometry.Point3D;
 import javafx.scene.*;
+import javafx.scene.control.Separator;
 import javafx.scene.control.SplitPane;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
@@ -271,8 +275,7 @@ public class Main extends Application {
 
         Point3D ec = randomPointAtDistance(distance, origin);
         boolean empty = true;
-        for (Point3D p:
-                cellCenters) {
+        for (Point3D p: cellCenters) {
             if (p.distance(ec) < (cellRad * 2)) {
                 empty = false;
             }
@@ -305,12 +308,14 @@ public class Main extends Application {
         buildAxes();
         generateCells();
         Parent genesRoot = FXMLLoader.load(getClass().getResource("genes.fxml"));
-        SubScene genesScene = new SubScene(genesRoot, 1024, 768);
-        SubScene cellsScene = new SubScene(cellsRoot, 1024, 768, true, SceneAntialiasing.BALANCED);
+        SubScene genesScene = new SubScene(genesRoot, 1024, 1024);
+        SubScene cellsScene = new SubScene(cellsRoot, 1024, 1024, true, SceneAntialiasing.BALANCED);
+        Separator separator = new Separator();
+        separator.setOrientation(Orientation.VERTICAL);
 
-        SplitPane root = new SplitPane(cellsScene, genesScene);
+        HBox root = new HBox(cellsScene, separator, genesScene);
 
-        Scene mainScene = new Scene(root, 1024, 768, true);
+        Scene mainScene = new Scene(root, 2048, 1024, true);
         mainScene.setFill(Color.CORNSILK);
 
         handleKeyboard(mainScene, world);
