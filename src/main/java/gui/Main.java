@@ -307,7 +307,7 @@ public class Main extends Application {
         buildCamera();
         buildAxes();
         generateCells();
-        Parent genesRoot = FXMLLoader.load(getClass().getResource("genes.fxml"));
+        Parent genesRoot = FXMLLoader.load(getClass().getResource("/fxml/genes.fxml"));
         SubScene genesScene = new SubScene(genesRoot, 1024, 1024);
         SubScene cellsScene = new SubScene(cellsRoot, 1024, 1024, true, SceneAntialiasing.BALANCED);
         Separator separator = new Separator();
