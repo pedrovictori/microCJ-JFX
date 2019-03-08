@@ -32,14 +32,14 @@
 
 package gui;
 
+import core.CircleGraph;
+import graph.GeneGraph;
 import javafx.application.Application;
 import javafx.event.EventHandler;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Orientation;
 import javafx.geometry.Point3D;
 import javafx.scene.*;
 import javafx.scene.control.Separator;
-import javafx.scene.control.SplitPane;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
@@ -307,8 +307,10 @@ public class Main extends Application {
         buildCamera();
         buildAxes();
         generateCells();
-        Parent genesRoot = FXMLLoader.load(getClass().getResource("/fxml/genes.fxml"));
-        SubScene genesScene = new SubScene(genesRoot, 1024, 1024);
+        GeneGraph graph = new GeneGraph(1);
+        CircleGraph circleGraph = new CircleGraph(graph.getGraph(), 400.);
+        Pane pane = new StackPane(circleGraph);
+        SubScene genesScene = new SubScene(pane, 1024, 1024);
         SubScene cellsScene = new SubScene(cellsRoot, 1024, 1024, true, SceneAntialiasing.BALANCED);
         Separator separator = new Separator();
         separator.setOrientation(Orientation.VERTICAL);
