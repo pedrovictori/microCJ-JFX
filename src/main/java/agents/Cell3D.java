@@ -2,7 +2,9 @@ package agents;
 
 import core.Node;
 import geom.Point3D;
+import graph.GeneGraph;
 import graph.GeneLink;
+import graph_diagram.GeneDiagram;
 import graphs.CircleGraph;
 import javafx.scene.shape.Sphere;
 import core.Cell;
@@ -10,7 +12,7 @@ import javafx.scene.transform.Translate;
 
 public class Cell3D extends Sphere{
 	private Cell cell;
-	private CircleGraph<Node, GeneLink> graphDiagram;
+	private GeneDiagram geneDiagram;
 
 	public Cell3D(Cell cell) {
 		super(cell.getRadius());
@@ -27,12 +29,12 @@ public class Cell3D extends Sphere{
 	}
 
 	private void updateGraph() {
-		graphDiagram = new CircleGraph<>(getCell().getGeneGraph().getGraph(), 400.);
+		geneDiagram = new GeneDiagram(getCell().getGeneGraph(), 300.);
 	}
 
-	public CircleGraph<Node, GeneLink> getGraphDiagram() {
+	public GeneDiagram getGeneDiagram() {
 		updateGraph();
-		return graphDiagram;
+		return geneDiagram;
 	}
 
 	public Point3D getLocation() {

@@ -35,10 +35,7 @@ package gui;
 import agents.Cell3D;
 import core.Cell;
 import core.Tumor;
-import graph.GeneLink;
-import graphs.CircleGraph;
 import geom.Point3D;
-import graph.GeneGraph;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
@@ -57,7 +54,6 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  *
@@ -280,7 +276,7 @@ public class Main extends Application {
     private void addEventToCell(Cell3D cell) {
         cell.setOnMouseClicked(event -> {
             graphPane.getChildren().clear();
-            graphPane.getChildren().add(cell.getGraphDiagram());
+            graphPane.getChildren().add(cell.getGeneDiagram());
         });
     }
 
