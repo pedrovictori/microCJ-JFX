@@ -32,12 +32,14 @@
 
 package gui;
 
-import core.CircleGraph;
+import agents.Cell3D;
+import graph.GeneLink;
+import graphs.CircleGraph;
+import geom.Point3D;
 import graph.GeneGraph;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
-import javafx.geometry.Point3D;
 import javafx.scene.*;
 import javafx.scene.control.Separator;
 import javafx.scene.input.KeyEvent;
@@ -48,8 +50,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
-import javafx.scene.shape.Sphere;
-import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -94,6 +94,7 @@ public class Main extends Application {
     private double cellRad = 10;
     private List<Xform> cellShapes = new ArrayList<>();
     private List<Point3D> cellCenters = new ArrayList<>();
+    private Pane graphPane;
 
     //   private void buildScene() {
     //       cellsRoot.getChildren().add(world);
@@ -220,13 +221,14 @@ public class Main extends Application {
 
         for (; cellShapes.size() < cells;) { //the loop runs until all cells are created
             if (cellShapes.size() == 0) {//if no cells, create first cell
-                Sphere cell = new Sphere(cellRad);
+                Cell3D cell = new Cell3D(Point3D.ZERO);
                 cell.setMaterial(greyMaterial);
                 Xform cellx = new Xform();
                 cellx.getChildren().add(cell);
                 world.getChildren().add(cellx);
                 cellShapes.add(cellx);
                 cellCenters.add(Point3D.ZERO);
+                addEventToCell(cell);
             }
 
             else {
@@ -234,19 +236,13 @@ public class Main extends Application {
                 Xform cellx = cellShapes.get(cellShapes.size() - 1);
                 Point3D newCentre = centreForProliferation(cellx.getChildren().get(0));
                 cellCenters.add(newCentre);
-                Sphere cell = new Sphere(cellRad);
+                Cell3D cell = new Cell3D(newCentre);
                 cell.setMaterial(greyMaterial);
                 Xform ncellx = new Xform();
                 ncellx.getChildren().add(cell);
                 world.getChildren().add(ncellx);
                 cellShapes.add(ncellx);
-
-                //move cell
-                Translate translation = new Translate(newCentre.getX(), newCentre.getY(), newCentre.getZ());
-                cell.getTransforms().clear();
-                cell.getTransforms().addAll(translation);
-
-
+                addEventToCell(cell);
             }
         }
     }
@@ -307,10 +303,8 @@ public class Main extends Application {
         buildCamera();
         buildAxes();
         generateCells();
-        GeneGraph graph = new GeneGraph(1);
-        CircleGraph circleGraph = new CircleGraph(graph.getGraph(), 400.);
-        Pane pane = new StackPane(circleGraph);
-        SubScene genesScene = new SubScene(pane, 1024, 1024);
+        graphPane = new StackPane();
+        SubScene genesScene = new SubScene(graphPane, 1024, 1024);
         SubScene cellsScene = new SubScene(cellsRoot, 1024, 1024, true, SceneAntialiasing.BALANCED);
         Separator separator = new Separator();
         separator.setOrientation(Orientation.VERTICAL);
@@ -340,6 +334,13 @@ public class Main extends Application {
      */
     public static void main(String[] args) {
         launch(args);
+    }
+
+    private void addEventToCell(Cell3D cell) {
+        cell.setOnMouseClicked(event -> {
+            graphPane.getChildren().clear();
+            graphPane.getChildren().add(cell.getGraphDiagram());
+        });
     }
 
 }
