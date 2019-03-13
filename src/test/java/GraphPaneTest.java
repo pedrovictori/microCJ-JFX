@@ -1,4 +1,4 @@
-import core.CircleGraph;
+import graphs.CircleGraph;
 import graph.GeneGraph;
 import javafx.application.Application;
 import javafx.scene.Scene;
