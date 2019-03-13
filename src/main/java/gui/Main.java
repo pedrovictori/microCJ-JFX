@@ -33,6 +33,8 @@
 package gui;
 
 import agents.Cell3D;
+import core.Cell;
+import core.Tumor;
 import graph.GeneLink;
 import graphs.CircleGraph;
 import geom.Point3D;
@@ -95,6 +97,9 @@ public class Main extends Application {
     private List<Xform> cellShapes = new ArrayList<>();
     private List<Point3D> cellCenters = new ArrayList<>();
     private Pane graphPane;
+
+    private static final int INITIAL_TUMOR_SIZE = 100;
+    private Tumor tumor;
 
     //   private void buildScene() {
     //       cellsRoot.getChildren().add(world);
@@ -217,80 +222,16 @@ public class Main extends Application {
         greyMaterial.setDiffuseColor(Color.DARKGREY);
         greyMaterial.setSpecularColor(Color.GREY);
 
-        Random rand = new Random();
-
-        for (; cellShapes.size() < cells;) { //the loop runs until all cells are created
-            if (cellShapes.size() == 0) {//if no cells, create first cell
-                Cell3D cell = new Cell3D(Point3D.ZERO);
-                cell.setMaterial(greyMaterial);
-                Xform cellx = new Xform();
-                cellx.getChildren().add(cell);
-                world.getChildren().add(cellx);
-                cellShapes.add(cellx);
-                cellCenters.add(Point3D.ZERO);
-                addEventToCell(cell);
-            }
-
-            else {
-
-                Xform cellx = cellShapes.get(cellShapes.size() - 1);
-                Point3D newCentre = centreForProliferation(cellx.getChildren().get(0));
-                cellCenters.add(newCentre);
-                Cell3D cell = new Cell3D(newCentre);
-                cell.setMaterial(greyMaterial);
-                Xform ncellx = new Xform();
-                ncellx.getChildren().add(cell);
-                world.getChildren().add(ncellx);
-                cellShapes.add(ncellx);
-                addEventToCell(cell);
-            }
+        tumor = new Tumor(INITIAL_TUMOR_SIZE);
+        for (Cell cell : tumor.getCellList()) {
+            Cell3D cell3d = new Cell3D(cell);
+            cell3d.setMaterial(greyMaterial);
+            Xform ncellx = new Xform();
+            ncellx.getChildren().add(cell3d);
+            world.getChildren().add(ncellx);
+            cellShapes.add(ncellx);
+            addEventToCell(cell3d);
         }
-    }
-
-    private Point3D randomPointAtDistance(double distance, Point3D origin) { Random rand = new Random();
-        Point3D randomPoint = new Point3D(rand.nextInt(100) - 50, rand.nextInt(100) - 50, rand.nextInt(100) - 50);
-        double x1 = origin.getX();
-        double y1 = origin.getY();
-        double z1 = origin.getZ();
-        double x2 = randomPoint.getX();
-        double y2 = randomPoint.getY();
-        double z2 = randomPoint.getZ();
-        double d = Math.sqrt( //d = sqrt((x2 - x1)^2 + (y2 - y1)^2 + (z2 - z1)^2)
-                Math.pow(x2 - x1, 2) +
-                        Math.pow(y2 - y1, 2) +
-                        Math.pow(z2 - z1, 2));
-
-        double u = distance / d;
-        double x3 = (1 - u) * x1 + u * x2;
-        double y3 = (1 - u) * y1 + u * y2;
-        double z3 = (1 - u) * z1 + u * z2;
-        return new Point3D(x3, y3, z3);
-    }
-
-    private Point3D findEmptyCenter(double distance, Point3D origin) {
-
-        Point3D ec = randomPointAtDistance(distance, origin);
-        boolean empty = true;
-        for (Point3D p: cellCenters) {
-            if (p.distance(ec) < (cellRad * 2)) {
-                empty = false;
-            }
-        }
-        if (empty) {
-            return ec;
-        } else {
-            return findEmptyCenter(distance+0.005, origin); //that number was determined via trial and error as the lowest one needed to avoid an stack overflow error
-        }
-    }
-
-    /**
-     * Returns the centre for a new cell Sphere that is touching the original Sphere at a random location
-     * @param origin
-     * @return the centre of the new cell
-     */
-    private Point3D centreForProliferation(Node origin) {
-        Point3D originCenter = new Point3D(origin.getTranslateX(), origin.getTranslateY(), origin.getTranslateZ());
-        return findEmptyCenter(cellRad*2, originCenter);
     }
 
     @Override

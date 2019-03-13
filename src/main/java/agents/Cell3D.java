@@ -12,16 +12,10 @@ public class Cell3D extends Sphere{
 	private Cell cell;
 	private CircleGraph<Node, GeneLink> graphDiagram;
 
-	public Cell3D(double radius, Point3D location) {
-		super(radius);
-		cell = new Cell(location, radius);
-		moveTo(location);
-	}
-
-	public Cell3D(Point3D location) {
-		super(Cell.getDefaultSize());
-		cell = new Cell(location);
-		moveTo(location);
+	public Cell3D(Cell cell) {
+		super(cell.getRadius());
+		this.cell = cell;
+		moveTo(cell.getLocation());
 		updateGraph();
 	}
 
