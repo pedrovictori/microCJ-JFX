@@ -45,8 +45,8 @@
         <mainClass>gui.Main</mainClass>
     </properties>
 
-    <groupId>microC2</groupId>
-    <artifactId>microC2-JFX</artifactId>
+    <groupId>microCJ</groupId>
+    <artifactId>microCJ-JFX</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <dependencies>
@@ -61,13 +61,13 @@
             <version>11</version>
         </dependency>
         <dependency>
-            <groupId>microC2</groupId>
+            <groupId>microCJ</groupId>
             <artifactId>GraphFX</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>microC2</groupId>
-            <artifactId>microC2-core</artifactId>
+            <groupId>microCJ</groupId>
+            <artifactId>microCJ-core</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
