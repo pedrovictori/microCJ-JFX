@@ -1,8 +1,8 @@
-module microC2.JFX {
+module microCJ.JFX {
 	requires javafx.controls;
 	requires javafx.fxml;
 	requires GraphFX;
-	requires microC2.core;
+	requires microCJ.core;
 	opens gui to javafx.fxml;
 	exports gui;
 }
