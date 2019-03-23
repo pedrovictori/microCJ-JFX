@@ -34,7 +34,7 @@ package gui;
 
 import agents.Cell3D;
 import core.Cell;
-import core.Tumor;
+import core.World;
 import geom.Point3D;
 import javafx.application.Application;
 import javafx.event.EventHandler;
@@ -47,237 +47,271 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
 import javafx.stage.Stage;
+import update.Updatable;
+import update.Update;
+import update.UpdateFlag;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- *
  * @author cmcastil
  */
 public class Main extends Application {
 
-    final Group cellsRoot = new Group();
-    final Xform axisGroup = new Xform();
-    final Xform world = new Xform();
-    final PerspectiveCamera camera = new PerspectiveCamera(true);
-    final Xform cameraXform = new Xform();
-    final Xform cameraXform2 = new Xform();
-    final Xform cameraXform3 = new Xform();
-    private static final double CAMERA_INITIAL_DISTANCE = -450;
-    private static final double CAMERA_INITIAL_X_ANGLE = 70.0;
-    private static final double CAMERA_INITIAL_Y_ANGLE = 320.0;
-    private static final double CAMERA_NEAR_CLIP = 0.1;
-    private static final double CAMERA_FAR_CLIP = 10000.0;
-    private static final double AXIS_LENGTH = 250.0;
-    private static final double HYDROGEN_ANGLE = 104.5;
-    private static final double CONTROL_MULTIPLIER = 0.1;
-    private static final double SHIFT_MULTIPLIER = 10.0;
-    private static final double MOUSE_SPEED = 0.1;
-    private static final double ROTATION_SPEED = 2.0;
-    private static final double TRACK_SPEED = 0.3;
+	final Group cellsRoot = new Group();
+	final Xform axisGroup = new Xform();
+	final Xform nodes = new Xform();
+	final PerspectiveCamera camera = new PerspectiveCamera(true);
+	final Xform cameraXform = new Xform();
+	final Xform cameraXform2 = new Xform();
+	final Xform cameraXform3 = new Xform();
+	private static final double CAMERA_INITIAL_DISTANCE = -450;
+	private static final double CAMERA_INITIAL_X_ANGLE = 70.0;
+	private static final double CAMERA_INITIAL_Y_ANGLE = 320.0;
+	private static final double CAMERA_NEAR_CLIP = 0.1;
+	private static final double CAMERA_FAR_CLIP = 10000.0;
+	private static final double AXIS_LENGTH = 250.0;
+	private static final double HYDROGEN_ANGLE = 104.5;
+	private static final double CONTROL_MULTIPLIER = 0.1;
+	private static final double SHIFT_MULTIPLIER = 10.0;
+	private static final double MOUSE_SPEED = 0.1;
+	private static final double ROTATION_SPEED = 2.0;
+	private static final double TRACK_SPEED = 0.3;
 
-    double mousePosX;
-    double mousePosY;
-    double mouseOldX;
-    double mouseOldY;
-    double mouseDeltaX;
-    double mouseDeltaY;
+	double mousePosX;
+	double mousePosY;
+	double mouseOldX;
+	double mouseOldY;
+	double mouseDeltaX;
+	double mouseDeltaY;
 
-    private int cells = 100;
-    private double cellRad = 10;
-    private List<Xform> cellShapes = new ArrayList<>();
-    private List<Point3D> cellCenters = new ArrayList<>();
-    private Pane graphPane;
+	private int cells = 100;
+	private double cellRad = 10;
+	private List<Point3D> cellCenters = new ArrayList<>();
+	private Pane graphPane;
 
-    private static final int INITIAL_TUMOR_SIZE = 100;
-    private Tumor tumor;
+	private Cell3D selectedCell;
+	private Map<Integer, Xform> cellRefs = new HashMap<>();
 
-    //   private void buildScene() {
-    //       cellsRoot.getChildren().add(world);
-    //   }
-    private void buildCamera() {
-        System.out.println("buildCamera()");
-        cellsRoot.getChildren().add(cameraXform);
-        cameraXform.getChildren().add(cameraXform2);
-        cameraXform2.getChildren().add(cameraXform3);
-        cameraXform3.getChildren().add(camera);
-        cameraXform3.setRotateZ(180.0);
+	//   private void buildScene() {
+	//       cellsRoot.getChildren().add(nodes);
+	//   }
+	private void buildCamera() {
+		System.out.println("buildCamera()");
+		cellsRoot.getChildren().add(cameraXform);
+		cameraXform.getChildren().add(cameraXform2);
+		cameraXform2.getChildren().add(cameraXform3);
+		cameraXform3.getChildren().add(camera);
+		cameraXform3.setRotateZ(180.0);
 
-        camera.setNearClip(CAMERA_NEAR_CLIP);
-        camera.setFarClip(CAMERA_FAR_CLIP);
-        camera.setTranslateZ(CAMERA_INITIAL_DISTANCE);
-        cameraXform.ry.setAngle(CAMERA_INITIAL_Y_ANGLE);
-        cameraXform.rx.setAngle(CAMERA_INITIAL_X_ANGLE);
-    }
+		camera.setNearClip(CAMERA_NEAR_CLIP);
+		camera.setFarClip(CAMERA_FAR_CLIP);
+		camera.setTranslateZ(CAMERA_INITIAL_DISTANCE);
+		cameraXform.ry.setAngle(CAMERA_INITIAL_Y_ANGLE);
+		cameraXform.rx.setAngle(CAMERA_INITIAL_X_ANGLE);
+	}
 
-    private void buildAxes() {
-        System.out.println("buildAxes()");
-        final PhongMaterial redMaterial = new PhongMaterial();
-        redMaterial.setDiffuseColor(Color.DARKRED);
-        redMaterial.setSpecularColor(Color.RED);
+	private void buildAxes() {
+		System.out.println("buildAxes()");
+		final PhongMaterial redMaterial = new PhongMaterial();
+		redMaterial.setDiffuseColor(Color.DARKRED);
+		redMaterial.setSpecularColor(Color.RED);
 
-        final PhongMaterial greenMaterial = new PhongMaterial();
-        greenMaterial.setDiffuseColor(Color.DARKGREEN);
-        greenMaterial.setSpecularColor(Color.GREEN);
+		final PhongMaterial greenMaterial = new PhongMaterial();
+		greenMaterial.setDiffuseColor(Color.DARKGREEN);
+		greenMaterial.setSpecularColor(Color.GREEN);
 
-        final PhongMaterial blueMaterial = new PhongMaterial();
-        blueMaterial.setDiffuseColor(Color.DARKBLUE);
-        blueMaterial.setSpecularColor(Color.BLUE);
+		final PhongMaterial blueMaterial = new PhongMaterial();
+		blueMaterial.setDiffuseColor(Color.DARKBLUE);
+		blueMaterial.setSpecularColor(Color.BLUE);
 
-        final Box xAxis = new Box(AXIS_LENGTH, 1, 1);
-        final Box yAxis = new Box(1, AXIS_LENGTH, 1);
-        final Box zAxis = new Box(1, 1, AXIS_LENGTH);
+		final Box xAxis = new Box(AXIS_LENGTH, 1, 1);
+		final Box yAxis = new Box(1, AXIS_LENGTH, 1);
+		final Box zAxis = new Box(1, 1, AXIS_LENGTH);
 
-        xAxis.setMaterial(redMaterial);
-        yAxis.setMaterial(greenMaterial);
-        zAxis.setMaterial(blueMaterial);
+		xAxis.setMaterial(redMaterial);
+		yAxis.setMaterial(greenMaterial);
+		zAxis.setMaterial(blueMaterial);
 
-        axisGroup.getChildren().addAll(xAxis, yAxis, zAxis);
-        axisGroup.setVisible(false);
-        world.getChildren().addAll(axisGroup);
-    }
+		axisGroup.getChildren().addAll(xAxis, yAxis, zAxis);
+		axisGroup.setVisible(false);
+		nodes.getChildren().addAll(axisGroup);
+	}
 
-    private void handleMouse(Node scene, final Node root) {
-        scene.setOnMousePressed(new EventHandler<MouseEvent>() {
-            @Override public void handle(MouseEvent me) {
-                mousePosX = me.getSceneX();
-                mousePosY = me.getSceneY();
-                mouseOldX = me.getSceneX();
-                mouseOldY = me.getSceneY();
-            }
-        });
-        scene.setOnMouseDragged(new EventHandler<MouseEvent>() {
-            @Override public void handle(MouseEvent me) {
-                mouseOldX = mousePosX;
-                mouseOldY = mousePosY;
-                mousePosX = me.getSceneX();
-                mousePosY = me.getSceneY();
-                mouseDeltaX = (mousePosX - mouseOldX);
-                mouseDeltaY = (mousePosY - mouseOldY);
+	private void handleMouse(Node scene, final Node root) {
+		scene.setOnMousePressed(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent me) {
+				mousePosX = me.getSceneX();
+				mousePosY = me.getSceneY();
+				mouseOldX = me.getSceneX();
+				mouseOldY = me.getSceneY();
+			}
+		});
+		scene.setOnMouseDragged(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent me) {
+				mouseOldX = mousePosX;
+				mouseOldY = mousePosY;
+				mousePosX = me.getSceneX();
+				mousePosY = me.getSceneY();
+				mouseDeltaX = (mousePosX - mouseOldX);
+				mouseDeltaY = (mousePosY - mouseOldY);
 
-                double modifier = 1.0;
+				double modifier = 1.0;
 
-                if (me.isControlDown()) {
-                    modifier = CONTROL_MULTIPLIER;
-                }
-                if (me.isShiftDown()) {
-                    modifier = SHIFT_MULTIPLIER;
-                }
-                if (me.isPrimaryButtonDown()) {
-                    cameraXform.ry.setAngle(cameraXform.ry.getAngle() - mouseDeltaX*MOUSE_SPEED*modifier*ROTATION_SPEED);
-                    cameraXform.rx.setAngle(cameraXform.rx.getAngle() + mouseDeltaY*MOUSE_SPEED*modifier*ROTATION_SPEED);
-                }
-                else if (me.isSecondaryButtonDown()) {
-                    double z = camera.getTranslateZ();
-                    double newZ = z + mouseDeltaX*MOUSE_SPEED*modifier;
-                    camera.setTranslateZ(newZ);
-                }
-                else if (me.isMiddleButtonDown()) {
-                    cameraXform2.t.setX(cameraXform2.t.getX() + mouseDeltaX*MOUSE_SPEED*modifier*TRACK_SPEED);
-                    cameraXform2.t.setY(cameraXform2.t.getY() + mouseDeltaY*MOUSE_SPEED*modifier*TRACK_SPEED);
-                }
-            }
-        });
-    }
+				if (me.isControlDown()) {
+					modifier = CONTROL_MULTIPLIER;
+				}
+				if (me.isShiftDown()) {
+					modifier = SHIFT_MULTIPLIER;
+				}
+				if (me.isPrimaryButtonDown()) {
+					cameraXform.ry.setAngle(cameraXform.ry.getAngle() - mouseDeltaX * MOUSE_SPEED * modifier * ROTATION_SPEED);
+					cameraXform.rx.setAngle(cameraXform.rx.getAngle() + mouseDeltaY * MOUSE_SPEED * modifier * ROTATION_SPEED);
+				} else if (me.isSecondaryButtonDown()) {
+					double z = camera.getTranslateZ();
+					double newZ = z + mouseDeltaX * MOUSE_SPEED * modifier;
+					camera.setTranslateZ(newZ);
+				} else if (me.isMiddleButtonDown()) {
+					cameraXform2.t.setX(cameraXform2.t.getX() + mouseDeltaX * MOUSE_SPEED * modifier * TRACK_SPEED);
+					cameraXform2.t.setY(cameraXform2.t.getY() + mouseDeltaY * MOUSE_SPEED * modifier * TRACK_SPEED);
+				}
+			}
+		});
+	}
 
-    private void handleKeyboard(Scene scene, final Node root) {
-        scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent event) {
-                switch (event.getCode()) {
-                    case Z:
-                        cameraXform2.t.setX(0.0);
-                        cameraXform2.t.setY(0.0);
-                        camera.setTranslateZ(CAMERA_INITIAL_DISTANCE);
-                        cameraXform.ry.setAngle(CAMERA_INITIAL_Y_ANGLE);
-                        cameraXform.rx.setAngle(CAMERA_INITIAL_X_ANGLE);
-                        break;
-                    case X:
-                        axisGroup.setVisible(!axisGroup.isVisible());
-                        break;
-                }
-            }
-        });
-    }
+	private void handleKeyboard(Scene scene, final Node root) {
+		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event) {
+				switch (event.getCode()) {
+					case Z:
+						cameraXform2.t.setX(0.0);
+						cameraXform2.t.setY(0.0);
+						camera.setTranslateZ(CAMERA_INITIAL_DISTANCE);
+						cameraXform.ry.setAngle(CAMERA_INITIAL_Y_ANGLE);
+						cameraXform.rx.setAngle(CAMERA_INITIAL_X_ANGLE);
+						break;
+					case X:
+						axisGroup.setVisible(!axisGroup.isVisible());
+						break;
+				}
+			}
+		});
+	}
 
-    private void generateCells() {
-        final PhongMaterial redMaterial = new PhongMaterial();
-        redMaterial.setDiffuseColor(Color.DARKRED);
-        redMaterial.setSpecularColor(Color.RED);
+	private void generateWorld() {
+		final PhongMaterial redMaterial = new PhongMaterial();
+		redMaterial.setDiffuseColor(Color.DARKRED);
+		redMaterial.setSpecularColor(Color.RED);
 
-        final PhongMaterial whiteMaterial = new PhongMaterial();
-        whiteMaterial.setDiffuseColor(Color.WHITE);
-        whiteMaterial.setSpecularColor(Color.LIGHTBLUE);
+		final PhongMaterial whiteMaterial = new PhongMaterial();
+		whiteMaterial.setDiffuseColor(Color.WHITE);
+		whiteMaterial.setSpecularColor(Color.LIGHTBLUE);
 
-        final PhongMaterial greyMaterial = new PhongMaterial();
-        greyMaterial.setDiffuseColor(Color.DARKGREY);
-        greyMaterial.setSpecularColor(Color.GREY);
+		final PhongMaterial greyMaterial = new PhongMaterial();
+		greyMaterial.setDiffuseColor(Color.DARKGREY);
+		greyMaterial.setSpecularColor(Color.GREY);
 
-        tumor = new Tumor(INITIAL_TUMOR_SIZE);
-        for (Cell cell : tumor.getCellList()) {
-            Cell3D cell3d = new Cell3D(cell);
-            cell3d.setMaterial(greyMaterial);
-            Xform ncellx = new Xform();
-            ncellx.getChildren().add(cell3d);
-            world.getChildren().add(ncellx);
-            cellShapes.add(ncellx);
-            addEventToCell(cell3d);
-        }
-    }
+		World.INSTANCE.start();
 
-    @Override
-    public void start(Stage primaryStage) throws IOException {
+		for (Cell cell : World.INSTANCE.getTumor().getCellList()) {
+			addNewCell(cell, greyMaterial);
+		}
 
-        cellsRoot.getChildren().add(world);
-        cellsRoot.setDepthTest(DepthTest.ENABLE);
 
-        // buildScene();
-        buildCamera();
-        buildAxes();
-        generateCells();
-        graphPane = new StackPane();
-        SubScene genesScene = new SubScene(graphPane, 1024, 1024);
-        SubScene cellsScene = new SubScene(cellsRoot, 1024, 1024, true, SceneAntialiasing.BALANCED);
-        Separator separator = new Separator();
-        separator.setOrientation(Orientation.VERTICAL);
+		/*
+		This block happens at every step of the simulation.
+		* First, update the visualization of the currently selected cell's gene diagram
+		* Second, get all updates from the update queue and execute them.
+		 */
+		World.INSTANCE.getPaceMaker().addListener(() -> {
+			if(selectedCell != null) selectedCell.getGeneDiagram().updateActivationStatus(); //update currently shown gene graph
+			while (World.INSTANCE.getRemainingUpdates() > 0) {
+				Update<UpdateFlag, Updatable> update = World.INSTANCE.getUpdateFromQueue(); //retrieve an update from the queue, in priority order
+				switch (update.getFlag()) {
+					case DEAD_CELL:
+						nodes.getChildren().remove(cellRefs.get(((Cell) update.getUpdatable()).getId())); //finds the target cell in the map, and remove it from the 3D representation
+						break;
+					case NECROTIC_CELL:
+						//finds the cell Xform, get the Cell3d from it (only element of the group and the XForm) and paint it red.
+						((Cell3D) cellRefs.get(((Cell) update.getUpdatable()).getId()).getChildren().get(0)).setMaterial(redMaterial);
+						break;
+					case NEW_CELL:
+						addNewCell((Cell)update.getUpdatable(), greyMaterial);
+						break;
+				}
+			}
+		});
+	}
 
-        HBox root = new HBox(cellsScene, separator, genesScene);
+	private void addNewCell(Cell cell, Material material) {
+		Cell3D cell3d = new Cell3D(cell);
+		cell3d.setMaterial(material);
+		Xform cellXform = new Xform();
+		cellXform.getChildren().add(cell3d);
+		nodes.getChildren().add(cellXform);
+		addEventToCell(cell3d);
+		cellRefs.put(cell.getId(), cellXform);
+	}
 
-        Scene mainScene = new Scene(root, 2048, 1024, true);
-        mainScene.setFill(Color.CORNSILK);
+	@Override
+	public void start(Stage primaryStage) {
 
-        handleKeyboard(mainScene, world);
-        handleMouse(cellsScene, world);
+		cellsRoot.getChildren().add(nodes);
+		cellsRoot.setDepthTest(DepthTest.ENABLE);
 
-        primaryStage.setTitle("microC2");
-        primaryStage.setScene(mainScene);
-        primaryStage.show();
+		// buildScene();
+		buildCamera();
+		buildAxes();
+		generateWorld();
+		graphPane = new StackPane();
+		SubScene genesScene = new SubScene(graphPane, 1024, 1024);
+		SubScene cellsScene = new SubScene(cellsRoot, 1024, 1024, true, SceneAntialiasing.BALANCED);
+		Separator separator = new Separator();
+		separator.setOrientation(Orientation.VERTICAL);
 
-        cellsScene.setCamera(camera);
-    }
+		HBox root = new HBox(cellsScene, separator, genesScene);
 
-    /**
-     * The main() method is ignored in correctly deployed JavaFX application.
-     * main() serves only as fallback in case the application can not be
-     * launched through deployment artifacts, e.g., in IDEs with limited FX
-     * support. NetBeans ignores main().
-     *
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        launch(args);
-    }
+		Scene mainScene = new Scene(root, 2048, 1024, true);
+		mainScene.setFill(Color.CORNSILK);
 
-    private void addEventToCell(Cell3D cell) {
-        cell.setOnMouseClicked(event -> {
-            graphPane.getChildren().clear();
-            graphPane.getChildren().add(cell.getGeneDiagram());
-        });
-    }
+		handleKeyboard(mainScene, nodes);
+		handleMouse(cellsScene, nodes);
+
+		primaryStage.setTitle("microC2");
+		primaryStage.setScene(mainScene);
+		primaryStage.show();
+
+		cellsScene.setCamera(camera);
+	}
+
+	/**
+	 * The main() method is ignored in correctly deployed JavaFX application.
+	 * main() serves only as fallback in case the application can not be
+	 * launched through deployment artifacts, e.g., in IDEs with limited FX
+	 * support. NetBeans ignores main().
+	 *
+	 * @param args the command line arguments
+	 */
+	public static void main(String[] args) {
+		launch(args);
+	}
+
+	private void addEventToCell(Cell3D cell) {
+		cell.setOnMouseClicked(event -> {
+			selectedCell = cell;
+			graphPane.getChildren().clear();
+			graphPane.getChildren().add(cell.getGeneDiagram());
+		});
+	}
 
 }

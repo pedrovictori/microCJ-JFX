@@ -1,13 +1,21 @@
 package agents;
+/**
+ * @author Pedro Victori
+ */
+/*
+Copyright 2019 Pedro Victori
 
-import core.Node;
-import geom.Point3D;
-import graph.GeneGraph;
-import graph.GeneLink;
-import graph_diagram.GeneDiagram;
-import graphs.CircleGraph;
-import javafx.scene.shape.Sphere;
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+ */
+
 import core.Cell;
+import geom.Point3D;
+import graph_diagram.GeneDiagram;
+import javafx.scene.shape.Sphere;
 import javafx.scene.transform.Translate;
 
 public class Cell3D extends Sphere{
@@ -29,7 +37,10 @@ public class Cell3D extends Sphere{
 	}
 
 	private void updateGraph() {
-		geneDiagram = new GeneDiagram(getCell().getGeneGraph(), 300.);
+		if (geneDiagram == null) {
+			geneDiagram = new GeneDiagram(getCell().getGeneGraph(), 300.);
+		}
+		geneDiagram.updateActivationStatus();
 	}
 
 	public GeneDiagram getGeneDiagram() {
