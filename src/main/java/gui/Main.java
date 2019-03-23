@@ -37,6 +37,7 @@ import core.Cell;
 import core.World;
 import geom.Point3D;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.scene.*;
@@ -221,8 +222,6 @@ public class Main extends Application {
 		greyMaterial.setDiffuseColor(Color.DARKGREY);
 		greyMaterial.setSpecularColor(Color.GREY);
 
-		World.INSTANCE.start();
-
 		for (Cell cell : World.INSTANCE.getTumor().getCellList()) {
 			addNewCell(cell, greyMaterial);
 		}
@@ -234,22 +233,25 @@ public class Main extends Application {
 		* Second, get all updates from the update queue and execute them.
 		 */
 		World.INSTANCE.getPaceMaker().addListener(() -> {
-			if(selectedCell != null) selectedCell.getGeneDiagram().updateActivationStatus(); //update currently shown gene graph
-			while (World.INSTANCE.getRemainingUpdates() > 0) {
-				Update<UpdateFlag, Updatable> update = World.INSTANCE.getUpdateFromQueue(); //retrieve an update from the queue, in priority order
-				switch (update.getFlag()) {
-					case DEAD_CELL:
-						nodes.getChildren().remove(cellRefs.get(((Cell) update.getUpdatable()).getId())); //finds the target cell in the map, and remove it from the 3D representation
-						break;
-					case NECROTIC_CELL:
-						//finds the cell Xform, get the Cell3d from it (only element of the group and the XForm) and paint it red.
-						((Cell3D) cellRefs.get(((Cell) update.getUpdatable()).getId()).getChildren().get(0)).setMaterial(redMaterial);
-						break;
-					case NEW_CELL:
-						addNewCell((Cell)update.getUpdatable(), greyMaterial);
-						break;
+			Platform.runLater(() -> {
+				if (selectedCell != null)
+					selectedCell.getGeneDiagram().updateActivationStatus(); //update currently shown gene graph
+				while (World.INSTANCE.getRemainingGuiUpdates() > 0) {
+					Update<UpdateFlag, Updatable> update = World.INSTANCE.getUpdateFromGuiQueue(); //retrieve an update from the queue, in priority order
+					switch (update.getFlag()) {
+						case DEAD_CELL:
+							nodes.getChildren().remove(cellRefs.get(((Cell) update.getUpdatable()).getId())); //finds the target cell in the map, and remove it from the 3D representation
+							break;
+						case NECROTIC_CELL:
+							//finds the cell Xform, get the Cell3d from it (only element of the group and the XForm) and paint it red.
+							((Cell3D) cellRefs.get(((Cell) update.getUpdatable()).getId()).getChildren().get(0)).setMaterial(redMaterial);
+							break;
+						case NEW_CELL:
+							addNewCell((Cell) update.getUpdatable(), greyMaterial);
+							break;
+					}
 				}
-			}
+			});
 		});
 	}
 
@@ -292,6 +294,8 @@ public class Main extends Application {
 		primaryStage.show();
 
 		cellsScene.setCamera(camera);
+
+		World.INSTANCE.start();
 	}
 
 	/**
