@@ -247,7 +247,7 @@ public class Main extends Application {
 							((Cell3D) cellRefs.get(((Cell) update.getUpdatable()).getId()).getChildren().get(0)).setMaterial(redMaterial);
 							break;
 						case NEW_CELL:
-							addNewCell((Cell) update.getUpdatable(), greyMaterial);
+							addNewCell((Cell) update.getUpdatable(), whiteMaterial);
 							break;
 					}
 				}
