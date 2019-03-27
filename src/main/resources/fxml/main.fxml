@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.MainController">
+    <children>
+        <ToolBar prefHeight="40.0" prefWidth="200.0">
+            <items>
+                <Button fx:id="bPause" mnemonicParsing="false" text="Start" />
+                <Label fx:id="lTime"/>
+            </items>
+        </ToolBar>
+      <HBox fx:id="hbMain" prefHeight="100.0" prefWidth="200.0" />
+    </children>
+</VBox>
