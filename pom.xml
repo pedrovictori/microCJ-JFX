@@ -62,11 +62,6 @@
         </dependency>
         <dependency>
             <groupId>microCJ</groupId>
-            <artifactId>GraphFX</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>microCJ</groupId>
             <artifactId>microCJ-core</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
