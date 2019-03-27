@@ -1,9 +1,9 @@
 package graph_diagram;
 
-import core.FateNode;
-import core.Gene;
-import core.Input;
-import core.Node;
+import graph.FateNode;
+import graph.Gene;
+import graph.Input;
+import graph.Node;
 import graph.GeneGraph;
 import graph.GeneLink;
 import javafx.scene.Parent;

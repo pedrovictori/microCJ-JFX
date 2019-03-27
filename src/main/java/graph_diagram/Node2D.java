@@ -1,6 +1,6 @@
 package graph_diagram;
 
-import core.Node;
+import graph.Node;
 import javafx.scene.shape.Shape;
 
 public class Node2D {
