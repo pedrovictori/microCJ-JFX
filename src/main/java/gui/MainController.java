@@ -88,7 +88,17 @@ public class MainController {
 		hbMain.getChildren().addAll(cellsScene, separator, vbRight);
 		handleMouse(cellsScene, nodes);
 		cellsScene.setCamera(camera);
+		bPause.setOnAction(event -> {
+			paused = !paused;
+			if(paused){
+				World.INSTANCE.pause();
+				bPause.setText("Start");
+			}
+			else{
 				World.INSTANCE.start();
+				bPause.setText("Pause");
+			}
+		});
 	}
 
 	void setScene(Scene scene) {
