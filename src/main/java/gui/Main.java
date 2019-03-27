@@ -100,6 +100,8 @@ public class Main extends Application {
 
 	private Cell3D selectedCell;
 	private Map<Integer, Xform> cellRefs = new HashMap<>();
+	private Color[] palette = {Color.BLUE, Color.GREEN, Color.YELLOW, Color.YELLOWGREEN, Color.PURPLE, Color.BROWN, Color.ORANGE, Color.ORCHID}; //todo improve
+	private Map<String, Material> materialPalette = new HashMap<>();
 
 	//   private void buildScene() {
 	//       cellsRoot.getChildren().add(nodes);
@@ -214,16 +216,24 @@ public class Main extends Application {
 		redMaterial.setDiffuseColor(Color.DARKRED);
 		redMaterial.setSpecularColor(Color.RED);
 
-		final PhongMaterial whiteMaterial = new PhongMaterial();
-		whiteMaterial.setDiffuseColor(Color.WHITE);
-		whiteMaterial.setSpecularColor(Color.LIGHTBLUE);
-
 		final PhongMaterial greyMaterial = new PhongMaterial();
-		greyMaterial.setDiffuseColor(Color.DARKGREY);
-		greyMaterial.setSpecularColor(Color.GREY);
+		redMaterial.setDiffuseColor(Color.DARKGREY);
+		redMaterial.setSpecularColor(Color.GREY);
+
+		//generate palette with a color for each mutation group, and for cells with no mutation group
+		materialPalette.put("no-group", greyMaterial);
+		//todo maybe move this to a new class
+		List<String> mutationGroupNames = World.INSTANCE.getTumor().getMutationGroupsNames();
+		for (int i = 0; i < mutationGroupNames.size(); i++) {
+			Color color = palette[i];
+			final PhongMaterial material = new PhongMaterial();
+			material.setDiffuseColor(color);
+			material.setSpecularColor(color.brighter());
+			materialPalette.put(mutationGroupNames.get(i), material);
+		}
 
 		for (Cell cell : World.INSTANCE.getTumor().getCellList()) {
-			addNewCell(cell, greyMaterial);
+			addNewCell(cell);
 		}
 
 
@@ -247,7 +257,7 @@ public class Main extends Application {
 							((Cell3D) cellRefs.get(((Cell) update.getUpdatable()).getId()).getChildren().get(0)).setMaterial(redMaterial);
 							break;
 						case NEW_CELL:
-							addNewCell((Cell) update.getUpdatable(), whiteMaterial);
+							addNewCell((Cell) update.getUpdatable());
 							break;
 					}
 				}
@@ -255,9 +265,11 @@ public class Main extends Application {
 		});
 	}
 
-	private void addNewCell(Cell cell, Material material) {
+	private void addNewCell(Cell cell) {
 		Cell3D cell3d = new Cell3D(cell);
-		cell3d.setMaterial(material);
+
+		//assign the corresponding color to each cell, and a special color for cells with no mutation group);
+		cell3d.setMaterial(materialPalette.get(cell.getMutationGroupName().orElse("no-group")));
 		Xform cellXform = new Xform();
 		cellXform.getChildren().add(cell3d);
 		nodes.getChildren().add(cellXform);
