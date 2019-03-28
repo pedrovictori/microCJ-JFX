@@ -9,6 +9,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.scene.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -35,7 +36,10 @@ public class MainController {
 	@FXML public Label lTime;
 	@FXML public HBox hbMain;
 	private VBox vbRight;
+	private VBox vbStats;
+	private Label mutCounts = new Label();
 	private Label lInfo = new Label();
+	private Button bClose = new Button("X");
 	private final Group cellsRoot = new Group();
 	private final Xform axisGroup = new Xform();
 	private final Xform nodes = new Xform();
@@ -63,7 +67,7 @@ public class MainController {
 	private int cells = 100;
 	private double cellRad = 10;
 	private List<Point3D> cellCenters = new ArrayList<>();
-	private Pane graphPane;
+	private StackPane graphPane;
 	private Cell3D selectedCell;
 	private Map<Integer, Xform> cellRefs = new HashMap<>();
 	private Color[] palette = {Color.AQUA, Color.CORAL, Color.DARKSEAGREEN, Color.DARKORANGE, Color.BLUE, Color.GREEN, Color.YELLOW, Color.YELLOWGREEN, Color.PURPLE, Color.BROWN, Color.ORANGE, Color.ORCHID}; //todo improve
@@ -77,17 +81,31 @@ public class MainController {
 		buildCamera();
 		buildAxes();
 		generateWorld();
+		bClose.setCancelButton(true); //makes it responsive to ESC
 		graphPane = new StackPane();
+		StackPane.setAlignment(bClose, Pos.TOP_RIGHT);
+		mutCounts.setText(World.INSTANCE.getTumor().getMutationGroupsCounts().toString());
+		vbStats = new VBox(mutCounts);
+		graphPane.getChildren().add(vbStats);
+
 		SubScene genesScene = new SubScene(graphPane, 900, 900);
 		SubScene cellsScene = new SubScene(cellsRoot, 900, 900, true, SceneAntialiasing.BALANCED);
 		Separator separator = new Separator();
 		separator.setOrientation(Orientation.VERTICAL);
 		Separator separator2 = new Separator();
 		separator.setOrientation(Orientation.HORIZONTAL);
+
 		vbRight = new VBox(genesScene, separator2, lInfo);
 		hbMain.getChildren().addAll(cellsScene, separator, vbRight);
 		handleMouse(cellsScene, nodes);
 		cellsScene.setCamera(camera);
+
+		bClose.setOnAction(event -> {
+			selectedCell = null;
+			graphPane.getChildren().clear();
+			graphPane.getChildren().add(vbStats);
+		});
+
 		bPause.setOnAction(event -> {
 			paused = !paused;
 			if(paused){
@@ -238,6 +256,8 @@ public class MainController {
 					selectedCell.getGeneDiagram().updateActivationStatus(); //update currently shown gene graph
 					lInfo.setText(selectedCell.getCell().getInfo()); //update currently shown cell info
 				}
+				else mutCounts.setText(World.INSTANCE.getTumor().getMutationGroupsCounts().toString());
+
 				while (World.INSTANCE.getRemainingGuiUpdates() > 0) {
 					Update<UpdateFlag, Updatable> update = World.INSTANCE.getUpdateFromGuiQueue(); //retrieve an update from the queue, in priority order
 					switch (update.getFlag()) {
@@ -274,6 +294,7 @@ public class MainController {
 			selectedCell = cell;
 			graphPane.getChildren().clear();
 			graphPane.getChildren().add(cell.getGeneDiagram());
+			graphPane.getChildren().add(bClose);
 			lInfo.setText(cell.getCell().getInfo());
 		});
 	}
