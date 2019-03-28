@@ -38,6 +38,7 @@ public class MainController {
 	private VBox vbRight;
 	private VBox vbStats;
 	private Label mutCounts = new Label();
+	private Label totalCount = new Label();
 	private Label lInfo = new Label();
 	private Button bClose = new Button("X");
 	private final Group cellsRoot = new Group();
@@ -85,7 +86,8 @@ public class MainController {
 		graphPane = new StackPane();
 		StackPane.setAlignment(bClose, Pos.TOP_RIGHT);
 		mutCounts.setText(World.INSTANCE.getTumor().getMutationGroupsCounts().toString());
-		vbStats = new VBox(mutCounts);
+		totalCount.setText("Total count: " + World.INSTANCE.getTumor().getTotalCount());
+		vbStats = new VBox(totalCount, mutCounts);
 		graphPane.getChildren().add(vbStats);
 
 		SubScene genesScene = new SubScene(graphPane, 900, 900);
@@ -256,7 +258,10 @@ public class MainController {
 					selectedCell.getGeneDiagram().updateActivationStatus(); //update currently shown gene graph
 					lInfo.setText(selectedCell.getCell().getInfo()); //update currently shown cell info
 				}
-				else mutCounts.setText(World.INSTANCE.getTumor().getMutationGroupsCounts().toString());
+				else{
+					totalCount.setText("Total count: " + World.INSTANCE.getTumor().getTotalCount());
+					mutCounts.setText(World.INSTANCE.getTumor().getMutationGroupsCounts().toString());
+				}
 
 				while (World.INSTANCE.getRemainingGuiUpdates() > 0) {
 					Update<UpdateFlag, Updatable> update = World.INSTANCE.getUpdateFromGuiQueue(); //retrieve an update from the queue, in priority order
