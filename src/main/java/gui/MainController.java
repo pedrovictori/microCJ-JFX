@@ -8,6 +8,7 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.*;
@@ -22,6 +23,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
+import javafx.scene.text.Font;
 import update.Updatable;
 import update.Update;
 import update.UpdateFlag;
@@ -87,7 +89,11 @@ public class MainController {
 		StackPane.setAlignment(bClose, Pos.TOP_RIGHT);
 		mutCounts.setText(World.INSTANCE.getTumor().getMutationGroupsCounts().toString());
 		totalCount.setText("Total count: " + World.INSTANCE.getTumor().getTotalCount());
+		mutCounts.setFont(new Font(20));
+		totalCount.setFont(new Font(20));
 		vbStats = new VBox(totalCount, mutCounts);
+		vbStats.setSpacing(10);
+		vbStats.setPadding(new Insets(15));
 		graphPane.getChildren().add(vbStats);
 
 		SubScene genesScene = new SubScene(graphPane, 900, 900);
