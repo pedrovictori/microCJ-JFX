@@ -15,7 +15,7 @@ public class GraphPaneTest extends Application {
 
 	@Override
 	public void start(Stage primaryStage) {
-		GeneGraph graph = GeneGraph.RandomlyActivatedGraph(1).turnNode("Oxygen_supply", true);
+		GeneGraph graph = GeneGraph.RandomlyActivatedGraph(GeneGraph.getDefaultFile()).turnNode("Oxygen_supply", true);
 		GeneDiagram circleGraph = new GeneDiagram(graph, 400.);
 		Pane pane = new StackPane(circleGraph);
 		Scene scene = new Scene(pane);
