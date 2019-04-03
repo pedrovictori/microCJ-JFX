@@ -5,8 +5,6 @@ import core.Cell;
 import core.World;
 import geom.Point3D;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -15,8 +13,8 @@ import javafx.scene.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
+import javafx.scene.image.*;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -28,15 +26,22 @@ import update.Updatable;
 import update.Update;
 import update.UpdateFlag;
 
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class MainController {
-	@FXML public Button bPause;
-	@FXML public Label lTime;
-	@FXML public HBox hbMain;
+	@FXML
+	public Button bPause;
+	@FXML
+	public Label lTime;
+	@FXML
+	public HBox hbMain;
 	private VBox vbRight;
 	private VBox vbStats;
 	private Label mutCounts = new Label();
@@ -77,6 +82,7 @@ public class MainController {
 	private Map<String, Material> materialPalette = new HashMap<>();
 	private Scene mainScene;
 	private boolean paused = true;
+	private List<Image> snaps = new ArrayList<>();
 
 	public void initialize() {
 		cellsRoot.getChildren().add(nodes);
@@ -116,11 +122,10 @@ public class MainController {
 
 		bPause.setOnAction(event -> {
 			paused = !paused;
-			if(paused){
+			if (paused) {
 				World.INSTANCE.pause();
 				bPause.setText("Start");
-			}
-			else{
+			} else {
 				World.INSTANCE.start();
 				bPause.setText("Pause");
 			}
@@ -263,8 +268,7 @@ public class MainController {
 				if (selectedCell != null) {
 					selectedCell.getGeneDiagram().updateActivationStatus(); //update currently shown gene graph
 					lInfo.setText(selectedCell.getCell().getInfo()); //update currently shown cell info
-				}
-				else{
+				} else {
 					totalCount.setText("Total count: " + World.INSTANCE.getTumor().getTotalCount());
 					mutCounts.setText(World.INSTANCE.getTumor().getMutationGroupsCounts().toString());
 				}
@@ -284,8 +288,22 @@ public class MainController {
 							break;
 					}
 				}
+
+				//take snapshot
+				WritableImage snapshot = null;
+				snaps.add(mainScene.snapshot(snapshot));
 			});
 		});
+	}
+
+	void saveImages() {
+		for (int i = 0; i < snaps.size(); i++) {
+			saveImage(snaps.get(i), "snap" + i);
+		}
+	}
+
+	private void saveImage(Image image, String name) {
+
 	}
 
 	private void addNewCell(Cell cell) {
