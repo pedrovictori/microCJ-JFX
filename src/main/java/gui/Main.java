@@ -24,6 +24,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 public class Main extends Application {
+	private MainController controller;
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -36,7 +37,7 @@ public class Main extends Application {
 			scene.setFill(Color.CORNSILK);
 
 			// controller
-			MainController controller = fxmlLoader.getController();
+			controller = fxmlLoader.getController();
 
 			controller.setScene(scene);
 			primaryStage.setScene(scene);
